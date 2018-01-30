@@ -1,6 +1,8 @@
 
 import React from 'react';
-import {Panel} from 'react-bootstrap';
+import {Panel, Grid, Row} from 'react-bootstrap';
+import update from 'immutability-helper';
+import Message from './Message.jsx';
 
 class ChatView extends React.Component {
 	
@@ -8,18 +10,23 @@ class ChatView extends React.Component {
 		super(props);
 
 		this.state = {
-			messages: []
+			messages: [{topic: "TestTopic", text: "Hello, World"}]
 		};
 
 		this.setupConnection(props.connection);
 	}
 
+	renderMessages() {
+		return this.state.messages.map((msg, index) => <Message key={index} text={msg.text}/>);
+	}
+
 	render() {
 		return (
-				<div>
-					Chat:
-					{this.state.textWall}
-				</div>
+				<Grid fluid>
+					<Row>
+						{this.renderMessages()}
+					</Row>
+				</Grid>
 			   );
 	}
 
@@ -83,11 +90,17 @@ class ChatView extends React.Component {
 		console.log(error);
 	}
 
-	handleMessage = (topic, message, packet) => {
+	handleMessage = (topic, text, packet) => {
 		console.log("handleMessage()");
-		console.log(topic);
+		var message = {
+			topic: topic,
+			text: message
+		};
 		console.log(message);
 		console.log(packet);
+		this.setState((prevState) => update(prevState, {
+			messages: {$push: message}
+		}));
 	}
 }
 

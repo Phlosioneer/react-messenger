@@ -1,6 +1,6 @@
 import React from 'react';
-import ConnectionView from './ConnectionView.js';
-import ChatView from './ChatView.js';
+import ConnectionView from './ConnectionView.jsx';
+import ChatView from './ChatView.jsx';
 import update from 'immutability-helper';
 
 class App extends React.Component {

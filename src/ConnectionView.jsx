@@ -1,5 +1,4 @@
 import React from 'react';
-import './ConnectionView.css';
 import update from 'immutability-helper';
 import Mqtt from 'mqtt';
 import {FormControl, ControlLabel, Form, FormGroup,
