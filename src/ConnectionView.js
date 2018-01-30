@@ -2,22 +2,24 @@ import React from 'react';
 import './ConnectionView.css';
 import update from 'immutability-helper';
 import Mqtt from 'mqtt';
+import {FormControl, ControlLabel, Form, FormGroup,
+	Button, Alert, ProgressBar, Modal} from 'react-bootstrap';
 
 class ServerChoiceField extends React.Component {
 	render() {
 		return (
-			<div>
-				<input
+			<FormGroup>
+				<ControlLabel>
+					URL:
+				</ControlLabel>
+				<FormControl
 					type="text"
 					value={this.props.value}
 					placeholder="mqtt.server.com:port_number"
-					onInput={this.handleOnChange}
+					onChange={this.handleOnChange}
 					enabled={this.props.enabled.toString()}
-
-					// onChange is set to silence a runtime warning; React doesn't understand onInput.
-					onChange={() => null}
 					/>
-			</div>
+			</FormGroup>
 		);
 	}
 
@@ -41,10 +43,10 @@ class ConnectionView extends React.Component {
 	renderLoading() {
 		if (this.state.isConnecting) {
 			return (
-				<div>
+				<Alert bsStyle="info">
 					Connecting to server...
-					<div className="loader">Loading Graphic</div>
-				</div>
+					<ProgressBar active now={100}/>
+				</Alert>
 				);
 		} else {
 			return "";
@@ -54,7 +56,7 @@ class ConnectionView extends React.Component {
 	renderCancelButton() {
 		if (this.state.isConnecting) {
 			return (
-				<button onClick={this.handleFailedConnect}>Cancel Connection</button>
+				<Button onClick={this.handleCancel}>Cancel Connection</Button>
 				);
 		} else {
 			return "";
@@ -63,18 +65,33 @@ class ConnectionView extends React.Component {
 
 	render() {
 		return (
-			<div>
-				<div>
-					<ServerChoiceField 
-						value={this.state.serverName}
-						onChange={this.handleServerChange}
-						enabled={!this.state.isConnecting}
-					/>
-					<button onClick={this.handleConnect}>Connect</button>
+			<Modal.Dialog>
+				<Modal.Header>
+					<Modal.Title>
+						Connect to a server
+					</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<form onSubmit={this.handleConnect}>
+						<ServerChoiceField 
+							value={this.state.serverName}
+							onChange={this.handleServerChange}
+							enabled={!this.state.isConnecting}
+						/>
+					</form>
+				</Modal.Body>
+				<Modal.Footer>
 					{this.renderCancelButton()}
-				</div>
-				{this.renderLoading()}
-			</div>
+					<Button
+						bsStyle="primary"
+						onClick={this.handleConnect}
+						disabled={this.state.isConnecting}>
+							Connect
+					</Button>
+					
+					{this.renderLoading()}
+				</Modal.Footer>
+			</Modal.Dialog>
 		);
 	}
 	
@@ -98,7 +115,12 @@ class ConnectionView extends React.Component {
 		}
 	}
 
-	handleConnect = (newValue) => {
+	handleConnect = (e) => {
+		// This prevents the page-reload when called through onSubmit.
+		if (e) {
+			e.preventDefault();
+		}
+
 		// Note: setState ensures `this` is bound correctly.
 		this.setState((prevState) => {
 			var serverName = prevState.serverName;
@@ -135,18 +157,24 @@ class ConnectionView extends React.Component {
 		this.props.onConnect(connection);
 	}
 
-	// TODO: When the user clicks the cancel button, call connection.end(false) with a callback, and display
-	// "cancelling...". Then, when the callback occurs, reset. If cancel is clicked again while "cancelling..."
-	// then call connection.end(true) and reset.
 	handleFailedConnect = (error) => {
 		// TODO: Make this nicer. There is NO documentation about the form of the error object,
 		// or what errors are possible.
-		this.state.connection.end(true);
-		this.setState(update(this.state, {
-			isConnecting: {$set: false},
-			connection: {$set: null}
-		}));
+		this.handleCancel();
 		throw error;
+	}
+
+	// TODO: When the user clicks the cancel button, call connection.end(false) with a callback, and display
+	// "cancelling...". Then, when the callback occurs, reset. If cancel is clicked again while "cancelling..."
+	// then call connection.end(true) and reset.
+	handleCancel = () => {
+		this.setState((prevState) => {
+			this.state.connection.end(true);
+			return update(prevState, {
+				isConnecting: {$set: false},
+				connection: {$set: null}
+			});
+		});
 	}
 }
 

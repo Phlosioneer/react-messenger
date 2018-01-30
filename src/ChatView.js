@@ -1,6 +1,6 @@
 
 import React from 'react';
-
+import {Panel} from 'react-bootstrap';
 
 class ChatView extends React.Component {
 	
@@ -8,7 +8,7 @@ class ChatView extends React.Component {
 		super(props);
 
 		this.state = {
-			textWall: ""
+			messages: []
 		};
 
 		this.setupConnection(props.connection);
@@ -45,7 +45,7 @@ class ChatView extends React.Component {
 		conn.on('error', this.handleConnectionError);
 		conn.on('message', this.handleMessage);
 
-		conn.subscribe("$SYS/#");
+		conn.subscribe("root/#");
 	}
 
 	teardownConnection(conn) {
