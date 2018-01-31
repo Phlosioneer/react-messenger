@@ -2,6 +2,7 @@
   "name": "react-messenger",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://phlosioneer.github.io/react-messenger",
   "dependencies": {
     "babel-plugin-transform-class-properties": "^6.24.1",
     "immutability-helper": "^2.6.4",

@@ -1,7 +1,7 @@
 import React from 'react';
 import update from 'immutability-helper';
 import Mqtt from 'mqtt';
-import {FormControl, ControlLabel, Form, FormGroup,
+import {FormControl, ControlLabel, FormGroup,
 	Button, Alert, ProgressBar, Modal} from 'react-bootstrap';
 
 class ServerChoiceField extends React.Component {
@@ -107,7 +107,8 @@ class ConnectionView extends React.Component {
 	}
 
 	correctServerName(name) {
-		if (!name.toLowerCase().startsWith("ws://")) {
+		// TODO: Make this check better.
+		if (!name.toLowerCase().includes("://")) {
 			return "ws://" + name;
 		} else {
 			return name;
