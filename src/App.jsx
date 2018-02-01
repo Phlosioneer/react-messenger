@@ -1,6 +1,6 @@
 import React from 'react';
 import ConnectionView from './ConnectionView.jsx';
-import ChatView from './ChatView.jsx';
+import MainView from './MainView.jsx';
 import update from 'immutability-helper';
 
 class App extends React.Component {
@@ -17,7 +17,7 @@ class App extends React.Component {
 	render() {
 		if (this.state.isConnected) {
 			return (
-				<ChatView
+				<MainView
 			   		onDisconnect={this.handleDisconnect}
 					connection={this.state.connection}
 					/>

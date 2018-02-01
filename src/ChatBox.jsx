@@ -1,7 +1,7 @@
 
 import React from 'react';
 import update from 'immutability-helper';
-import {FormGroup, FormControl} from 'react-bootstrap';
+import {Form, FormControl, Button, Col} from 'react-bootstrap';
 
 
 class ChatBox extends React.Component {
@@ -17,13 +17,22 @@ class ChatBox extends React.Component {
 
 	render() {
 		return (
-			<FormControl
-				type="textarea"
-				placeholder="Type a message..."
-				value={this.state.text}
-				onChange={this.handleChange}
-				onKeyDown={this.handleKeyDown}
-				/>
+			<Form horizontal>
+				<Col sm={10}>
+					<FormControl
+						type="textarea"
+						placeholder="Type a message..."
+						value={this.state.text}
+						onChange={this.handleChange}
+						onKeyDown={this.handleKeyDown}
+						/>
+				</Col>
+				<Col sm={1}>
+					<Button onClick={this.handleSendClicked}>
+						Send
+					</Button>
+				</Col>
+			</Form>
 			);
 	}
 
@@ -36,13 +45,21 @@ class ChatBox extends React.Component {
 
 	handleKeyDown = (e) => {
 		if (e.key === "Enter" && !e.shiftKey && this.props.onSubmit) {
-			this.props.onSubmit(this.state.text);
+			this.handleSendClicked();
 			e.preventDefault();
 			e.nativeEvent.stopImmediatePropagation();
-			this.setState(update(this.state, {
-				text: {$set: ""}
-			}));
 		}
+	}
+
+	handleSendClicked = () => {
+		this.props.onSubmit(this.state.text, this.handleSendConfirmed);
+	}
+
+	handleSendConfirmed = () => {
+		console.log("handleSendConfirmed()");
+		this.setState((prevState) => update(prevState, {
+			text: {$set: ""}
+		}));
 	}
 
 }
