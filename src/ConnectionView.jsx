@@ -3,29 +3,8 @@ import update from 'immutability-helper';
 import Mqtt from 'mqtt';
 import {FormControl, ControlLabel, FormGroup,
 	Button, Alert, ProgressBar, Modal} from 'react-bootstrap';
+import SignInForm from './SignInForm.jsx'
 
-class ServerChoiceField extends React.Component {
-	render() {
-		return (
-			<FormGroup>
-				<ControlLabel>
-					URL:
-				</ControlLabel>
-				<FormControl
-					type="text"
-					value={this.props.value}
-					placeholder="mqtt.server.com:port_number"
-					onChange={this.handleOnChange}
-					enabled={this.props.enabled.toString()}
-					/>
-			</FormGroup>
-		);
-	}
-
-	handleOnChange = (e) => {
-		this.props.onChange(e.target.value);
-	}
-}
 
 class ConnectionView extends React.Component {
 	
@@ -35,6 +14,7 @@ class ConnectionView extends React.Component {
 		this.state = {
 			isConnecting: false,
 			serverName: "mqtt.bucknell.edu:9001",
+			username: "username",
 			connection: null
 		};
 	}
@@ -71,13 +51,13 @@ class ConnectionView extends React.Component {
 					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<form onSubmit={this.handleConnect}>
-						<ServerChoiceField 
-							value={this.state.serverName}
-							onChange={this.handleServerChange}
-							enabled={!this.state.isConnecting}
+					<SignInForm
+						enabled={!this.state.isConnecting}
+						serverName={this.state.serverName}
+						username={this.state.username}
+						onSubmit={this.handleConnect}
+						onChange={this.handleChange}
 						/>
-					</form>
 				</Modal.Body>
 				<Modal.Footer>
 					{this.renderCancelButton()}
@@ -94,16 +74,11 @@ class ConnectionView extends React.Component {
 		);
 	}
 	
-	handleServerChange = (newValue) => {
-		this.setState((prevState) => {
-			if (prevState.isConnecting) {
-				throw "Can't change server name while connecting to a server";
-			}
-
-			return update(prevState, {
-				serverName: {$set: newValue}
-			});
-		});	
+	handleChange = (values) => {
+		this.setState(update(this.state, {
+			serverName: {$set: values.serverName},
+			username: {$set: values.username}
+		}));
 	}
 
 	correctServerName(name) {
