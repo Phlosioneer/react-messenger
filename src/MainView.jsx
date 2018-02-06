@@ -1,9 +1,10 @@
 
 import React from 'react';
-import {Grid, Row} from 'react-bootstrap';
+import {Modal, Button, ButtonToolbar} from 'react-bootstrap';
 import update from 'immutability-helper';
 import MessageList from './MessageList.jsx';
-import ConnectionManager from './ConnectionManager';
+import ConnectionManager from './ConnectionManager.jsx';
+import {TextFieldWrapper} from './SignInForm.jsx';
 
 class MainView extends React.Component {
 	
@@ -11,7 +12,7 @@ class MainView extends React.Component {
 		super(props);
 
 		this.state = {
-			messages: [{topic: "TestTopic", text: "Hello, World"}],
+			messages: [],
 			connectionManager: new ConnectionManager(
 					this.handleGetMessage,
 					this.handleMessageSent,
@@ -22,18 +23,76 @@ class MainView extends React.Component {
 					),
 			sendConfirmCallback: null,
 			subConfirmCallback: null,
-			unsubConfirmCallback: null
+			unsubConfirmCallback: null,
+			currentTopic: "dummy_topic",
+			topicInputText: "dummy_topic",
+			subscriptionDialogActive: false
 		};
 
 		this.state.connectionManager.setupConnection(props.connection);
 	}
 
+	componentWillMount() {
+		this.doSubscribe("root/" + this.state.currentTopic + "/#");
+	}
+
+	componentWillUnmount() {
+		this.doUnsubscribe("root/" + this.state.currentTopic + "/#");
+	}
+
+	renderSubscriptionPicker() {
+		if (!this.state.subscriptionDialogActive) {
+			return (
+				<div>
+					<p>Current topic: {this.state.currentTopic}</p>
+					<Button onClick={this.handleActivateDialog}>Switch Channel</Button>
+				</div>
+				);
+		}
+
+		return (
+			<Modal.Dialog>
+				<Modal.Header>
+					<Modal.Title>Choose a Chat Room</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<p>Current topic: {this.state.currentTopic}</p>
+					<TextFieldWrapper
+						enabled="true"
+						label="New topic:"
+						value={this.state.topicInputText}
+						onSubmit={this.handleGotoChatroom}
+						onChange={this.handleTopicInputChange}
+						/>
+				</Modal.Body>
+				<Modal.Footer>
+					<ButtonToolbar>
+						<Button
+							key="cancel"
+							onClick={this.handleDismissDialog}>
+							Cancel
+						</Button>
+						<Button
+							key="ok"
+							onClick={this.handleGotoChatroom}
+							bsStyle="primary">
+							Go
+						</Button>
+					</ButtonToolbar>
+				</Modal.Footer>
+			</Modal.Dialog>
+			);
+	}
+
 	render() {
 		return (
-			<MessageList
-				messages={this.state.messages}
-				onSendMessage={this.handleSendMessage}
-				/>
+			<div>
+				{this.renderSubscriptionPicker()}
+				<MessageList
+					messages={this.state.messages}
+					onSendMessage={this.handleSendMessage}
+					/>
+			</div>
 			);
 	}
 
@@ -64,9 +123,12 @@ class MainView extends React.Component {
 		message = JSON.parse(message);
 		console.log(message);
 		console.log(packet);
+		var topicParts = topic.split('/');
+		var username = topicParts[topicParts.length - 1];
 		var messageProps = {
 			topic: topic,
-			text: message.message
+			text: message.message,
+			name: username
 		};
 		console.log(messageProps);
 		console.log(this.state);
@@ -80,9 +142,11 @@ class MainView extends React.Component {
 		console.log("handleSendMessage()");
 		console.log(text);
 		var imageUrl = "https://www.eg.bucknell.edu/~amm042/ic_account_circle_black_24dp_2x.png";
-		var message = {clientTime: 1, message: text, iconUrl: imageUrl};
+		var time = Math.round((new Date()).getTime() / 1000);
+		var message = {clientTime: time, message: text, iconUrl: imageUrl};
+		var topic = "root/" + this.state.currentTopic + "/" + this.props.username;
 		this.setState((prevState) => {
-			this.doPublish("root/dummy_chat/phlosioneer", JSON.stringify(message));
+			this.doPublish(topic, JSON.stringify(message));
 			return update(prevState, {
 				sendConfirmCallback: {$set: onSendConfirm}
 			});
@@ -139,6 +203,33 @@ class MainView extends React.Component {
 		console.log(code);
 		console.log(text);
 		// TODO: Make an alert at the top of the page.
+	}
+
+	handleTopicInputChange = (newValue) => {
+		this.setState(update(this.state, {
+			topicInputText: {$set: newValue}
+		}));
+	}
+
+	handleDismissDialog = () => {
+		this.setState(prevState => update(prevState, {
+			subscriptionDialogActive: {$set: false}
+		}));
+	}
+
+	handleGotoChatroom = () => {
+		this.doUnsubscribe("root/" + this.state.currentTopic + "/#");
+		this.doSubscribe("root/" + this.state.topicInputText + "/#");
+		this.setState(prevState => update(prevState, {
+			currentTopic: {$set: prevState.topicInputText}
+		}));
+		this.handleDismissDialog();
+	}
+
+	handleActivateDialog = () => {
+		this.setState(update(this.state, {
+			subscriptionDialogActive: {$set: true}
+		}));
 	}
 
 }

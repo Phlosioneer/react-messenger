@@ -69,7 +69,7 @@ class ConnectionManager {
 		conn.on('error', this.handleConnectionError);
 		conn.on('message', this.handleGetMessage);
 		
-		conn.subscribe("root/#", {qos: 2}, this.handleSubscribeCompleted);
+		//conn.subscribe("root/#", {qos: 2}, this.handleSubscribeCompleted);
 	}
 
 	teardownConnection() {
@@ -88,11 +88,15 @@ class ConnectionManager {
 	}
 
 	subscribe(topic) {
+		console.log("subscribe()");
+		console.log(topic);
 		this.conn.subscribe(topic, {qos: 2}, this.handleSubscribeCompleted);
 	}
 
 	unsubscribe(topic) {
-		this.conn.unsubscribe(topic, this.handleUnsubscribeError);
+		console.log("unsubscribe()");
+		console.log(topic);
+		this.conn.unsubscribe(topic, this.handleUnsubscribeCompleted);
 	}
 
 	publish(topic, message) {
@@ -193,12 +197,12 @@ class ConnectionManager {
 		}
 	}
 
-	handleUnsubscribeError = (error) => {
-		console.log("handleUnsubscribeError()");
+	handleUnsubscribeCompleted = (error) => {
+		console.log("handleUnsubscribeCompleted()");
 		console.log(error);
 
 		// TODO: Change the message based on the error.
-		if (this.onError) {
+		if (error && this.onError) {
 			this.onError(this.ERR_UNSUB, "Failed to unsubscribe from topic.");
 		}
 	}

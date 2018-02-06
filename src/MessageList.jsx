@@ -10,7 +10,7 @@ class MessageList extends React.Component {
 	renderMessages() {
 		return this.props.messages.map((msg, index) => (
 				<Row key={index}>
-					<Message text={msg.text}/>
+					<Message username={msg.name} text={msg.text}/>
 				</Row>
 				));
 	}

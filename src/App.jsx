@@ -10,8 +10,9 @@ class App extends React.Component {
 
 		this.state = {
 			isConnected: false,
-			connection: null
-		}
+			connection: null,
+			username: ""
+		};
 	}
 
 	render() {
@@ -20,6 +21,7 @@ class App extends React.Component {
 				<MainView
 			   		onDisconnect={this.handleDisconnect}
 					connection={this.state.connection}
+					username={this.state.username}
 					/>
 				);
 		} else {
@@ -39,10 +41,11 @@ class App extends React.Component {
 		window.removeEventListener("beforeunload", this.handleDisconnect);
 	}
 
-	handleConnect = (connection) => {
+	handleConnect = (connection, username) => {
 		this.setState(update(this.state, {
 			isConnected: {$set: true},
-			connection: {$set: connection}
+			connection: {$set: connection},
+			username: {$set: username}
 		}));
 	}
 

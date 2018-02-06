@@ -98,5 +98,6 @@ class SignInForm extends React.Component {
 
 }
 
+export {TextFieldWrapper};
 export default SignInForm;
 

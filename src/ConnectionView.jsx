@@ -129,7 +129,7 @@ class ConnectionView extends React.Component {
 		}));
 		
 		// Pass the connection up to the parent.
-		this.props.onConnect(connection);
+		this.props.onConnect(connection, this.state.username);
 	}
 
 	handleFailedConnect = (error) => {
